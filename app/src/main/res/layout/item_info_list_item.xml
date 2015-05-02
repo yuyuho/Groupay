@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/item_store"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:textColor="@color/material_blue_grey_800"
+        android:textSize="20sp"
+        android:gravity="center|start"
+        android:layout_marginRight="15dp"
+        android:layout_weight="0.2" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:gravity="center"
+        android:layout_weight="0.4" />
+    <TextView
+        android:id="@+id/progress_bar_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:layout_weight="0.2" />
+    <TextView
+        android:id="@+id/item_price"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:paddingRight="10dp"
+        android:textColor="@color/material_blue_grey_800"
+        android:textSize="15sp"
+        android:gravity="center|end"
+        android:layout_marginRight="15dp"
+        android:layout_weight="0.2"
+        android:layout_gravity="right"
+        android:textAlignment="textEnd" />
+</LinearLayout>

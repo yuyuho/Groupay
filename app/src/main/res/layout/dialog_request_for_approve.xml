@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:text="@string/request_for_approval"
+        android:textColor="@color/material_blue_grey_800"
+        android:textSize="20dp"/>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:paddingTop="20dp"
+        android:paddingLeft="20dp">
+        <CheckBox
+            android:id="@+id/store_check_box"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="20dip"
+            android:text="@string/store_name"
+            android:textColor="@color/material_blue_grey_800"
+            android:textSize="20dp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:paddingTop="20dp"
+        android:paddingLeft="20dp">
+        <CheckBox
+            android:id="@+id/receipt_check_box"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="20dip"
+            android:text="@string/receipt_image"
+            android:textColor="@color/material_blue_grey_800"
+            android:textSize="20dp" />
+    </LinearLayout>
+</LinearLayout>
