@@ -1,5 +1,6 @@
 package com.cmpe277.groupay;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,27 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.net.Uri;
+import android.widget.Toast;
+
+import com.paypal.android.sdk.payments.PayPalAuthorization;
+import com.paypal.android.sdk.payments.PayPalConfiguration;
+import com.paypal.android.sdk.payments.PayPalFuturePaymentActivity;
+import com.paypal.android.sdk.payments.PayPalItem;
+import com.paypal.android.sdk.payments.PayPalOAuthScopes;
+import com.paypal.android.sdk.payments.PayPalPayment;
+import com.paypal.android.sdk.payments.PayPalPaymentDetails;
+import com.paypal.android.sdk.payments.PayPalProfileSharingActivity;
+import com.paypal.android.sdk.payments.PayPalService;
+import com.paypal.android.sdk.payments.PaymentActivity;
+import com.paypal.android.sdk.payments.PaymentConfirmation;
+
+import org.json.JSONException;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class ItemTabFragment extends Fragment {
@@ -28,6 +50,22 @@ public class ItemTabFragment extends Fragment {
     private static final String BUY_DIALOG_TAG = "Buy dialog tag";
     private Event mEvent;
     private int mEventIdx;
+    //paypal stuffs
+    private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_NO_NETWORK;
+    //private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_SANDBOX;
+    private static final String CONFIG_CLIENT_ID = "ahruizguerra-facilitator@hotmail.com";
+
+    private static final int REQUEST_CODE_PAYMENT = 1;
+    private static final int REQUEST_CODE_FUTURE_PAYMENT = 2;
+    private static final int REQUEST_CODE_PROFILE_SHARING = 3;
+
+    private static PayPalConfiguration config = new PayPalConfiguration()
+            .environment(CONFIG_ENVIRONMENT)
+            .clientId(CONFIG_CLIENT_ID)
+                    // The following are only used in PayPalFuturePaymentActivity.
+            .merchantName("Example Merchant")
+            .merchantPrivacyPolicyUri(Uri.parse("https://www.example.com/privacy"))
+            .merchantUserAgreementUri(Uri.parse("https://www.example.com/legal"));
 
     public static ItemTabFragment newInstance (int eventNum){
         Bundle args = new Bundle();
@@ -48,6 +86,19 @@ public class ItemTabFragment extends Fragment {
         }
         Log.d(TAG,"current event index "+ mEventIdx);
         mEvent = Data.get().getEvent(mEventIdx);
+
+        // start paypal intent
+        Intent intent = new Intent(ItemTabFragment.this.getActivity(), PayPalService.class);
+        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
+        ItemTabFragment.this.getActivity().startService(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        // Stop service when done
+        ItemTabFragment.this.getActivity().stopService(
+                new Intent(ItemTabFragment.this.getActivity(), PayPalService.class));
+        super.onDestroy();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,16 +109,25 @@ public class ItemTabFragment extends Fragment {
 
         Log.d(TAG, "I see " + mEventIdx);
         if(mEvent.getEventStatus() == Event.EVENT_STATUS.close){
-            youOweButton.setVisibility(View.VISIBLE);
+            youOweButton.setVisibility(View.INVISIBLE);
         }
         else{
-            youOweButton.setVisibility(View.INVISIBLE);
+            youOweButton.setVisibility(View.VISIBLE);
         }
 
         youOweButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO go to paypal api
+                PayPalPayment thingToBuy = getThingToBuy(PayPalPayment.PAYMENT_INTENT_SALE);
+                Intent intent = new Intent(v.getContext(), PaymentActivity.class);
+
+                // send the same configuration for restart resiliency
+                intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
+
+                intent.putExtra(PaymentActivity.EXTRA_PAYMENT, thingToBuy);
+
+                startActivityForResult(intent, REQUEST_CODE_PAYMENT);
             }
         });
 
@@ -304,6 +364,117 @@ public class ItemTabFragment extends Fragment {
         dialogBuilder.create().show();
         return true;
 
+    }
+
+    // paypal private functions
+    private PayPalPayment getThingToBuy(String paymentIntent) {
+        return new PayPalPayment(new BigDecimal("1.75"), "USD", "sample item",
+                paymentIntent);
+    }
+
+    private PayPalOAuthScopes getOauthScopes() {
+        /* create the set of required scopes*/
+        Set<String> scopes = new HashSet<String>(
+                Arrays.asList(PayPalOAuthScopes.PAYPAL_SCOPE_EMAIL, PayPalOAuthScopes.PAYPAL_SCOPE_ADDRESS) );
+        return new PayPalOAuthScopes(scopes);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                PaymentConfirmation confirm =
+                        data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
+                if (confirm != null) {
+                    try {
+                        //Log.i(TAG, confirm.toJSONObject().toString(4));
+                       // Log.i(TAG, confirm.getPayment().toJSONObject().toString(4));
+                        /*
+                         *  TODO: send 'confirm' (and possibly confirm.getPayment() to your server for verification
+                         * or consent completion.
+                         * See https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
+                         * for more details.
+                         *
+                         * For sample mobile backend interactions, see
+                         * https://github.com/paypal/rest-api-sdk-python/tree/master/samples/mobile_backend
+                         */
+                        Toast.makeText(
+                                ItemTabFragment.this.getActivity(),
+                                "PaymentConfirmation info received from PayPal", Toast.LENGTH_LONG)
+                                .show();
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
+                    }
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.i(TAG, "The user canceled.");
+            } else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
+                Log.i(
+                        TAG,
+                        "An invalid Payment or PayPalConfiguration was submitted. Please see the docs.");
+            }
+        } else if (requestCode == REQUEST_CODE_FUTURE_PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                PayPalAuthorization auth =
+                        data.getParcelableExtra(PayPalFuturePaymentActivity.EXTRA_RESULT_AUTHORIZATION);
+                if (auth != null) {
+                    try {
+                        Log.i("FuturePaymentExample", auth.toJSONObject().toString(4));
+
+                        String authorization_code = auth.getAuthorizationCode();
+                        Log.i("FuturePaymentExample", authorization_code);
+
+                        sendAuthorizationToServer(auth);
+                        Toast.makeText(
+                                ItemTabFragment.this.getActivity(),
+                                "Future Payment code received from PayPal", Toast.LENGTH_LONG)
+                                .show();
+
+                    } catch (JSONException e) {
+                        Log.e("FuturePaymentExample", "an extremely unlikely failure occurred: ", e);
+                    }
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.i("FuturePaymentExample", "The user canceled.");
+            } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
+                Log.i(
+                        "FuturePaymentExample",
+                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+            }
+        } else if (requestCode == REQUEST_CODE_PROFILE_SHARING) {
+            if (resultCode == Activity.RESULT_OK) {
+                PayPalAuthorization auth =
+                        data.getParcelableExtra(PayPalProfileSharingActivity.EXTRA_RESULT_AUTHORIZATION);
+                if (auth != null) {
+                    try {
+                        Log.i("ProfileSharingExample", auth.toJSONObject().toString(4));
+
+                        String authorization_code = auth.getAuthorizationCode();
+                        Log.i("ProfileSharingExample", authorization_code);
+
+                        sendAuthorizationToServer(auth);
+                        Toast.makeText(
+                                ItemTabFragment.this.getActivity(),
+                                "Profile Sharing code received from PayPal", Toast.LENGTH_LONG)
+                                .show();
+
+                    } catch (JSONException e) {
+                        Log.e("ProfileSharingExample", "an extremely unlikely failure occurred: ", e);
+                    }
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.i("ProfileSharingExample", "The user canceled.");
+            } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
+                Log.i(
+                        "ProfileSharingExample",
+                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+            }
+        }
+    }
+
+    private void sendAuthorizationToServer(PayPalAuthorization authorization) {
+        ;
     }
 
 }
