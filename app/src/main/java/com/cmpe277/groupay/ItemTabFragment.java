@@ -107,12 +107,11 @@ public class ItemTabFragment extends Fragment {
         Button youOweButton = (Button) v.findViewById(R.id.you_owe_button);
 
 
-        Log.d(TAG, "I see " + mEventIdx);
         if(mEvent.getEventStatus() == Event.EVENT_STATUS.close){
-            youOweButton.setVisibility(View.INVISIBLE);
+            youOweButton.setVisibility(View.VISIBLE);
         }
         else{
-            youOweButton.setVisibility(View.VISIBLE);
+            youOweButton.setVisibility(View.INVISIBLE);
         }
 
         youOweButton.setOnClickListener(new View.OnClickListener() {

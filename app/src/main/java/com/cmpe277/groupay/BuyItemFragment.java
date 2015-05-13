@@ -4,9 +4,13 @@ package com.cmpe277.groupay;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import java.io.File;
 
 public class BuyItemFragment extends DialogFragment {
     private static final String TAG = "BuyItemFragment";
@@ -96,6 +102,13 @@ public class BuyItemFragment extends DialogFragment {
                                 dialog.cancel();
                             }
                         });
+
+        receiptImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         return dialogBuilder.create();
     }
