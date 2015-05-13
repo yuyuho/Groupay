@@ -362,7 +362,6 @@ public class ItemTabFragment extends Fragment {
                         });
         dialogBuilder.create().show();
         return true;
-
     }
 
     // paypal private functions
@@ -386,24 +385,13 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
                 if (confirm != null) {
                     try {
-                        //Log.i(TAG, confirm.toJSONObject().toString(4));
-                       // Log.i(TAG, confirm.getPayment().toJSONObject().toString(4));
-                        /*
-                         *  TODO: send 'confirm' (and possibly confirm.getPayment() to your server for verification
-                         * or consent completion.
-                         * See https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
-                         * for more details.
-                         *
-                         * For sample mobile backend interactions, see
-                         * https://github.com/paypal/rest-api-sdk-python/tree/master/samples/mobile_backend
-                         */
                         Toast.makeText(
                                 ItemTabFragment.this.getActivity(),
-                                "PaymentConfirmation info received from PayPal", Toast.LENGTH_LONG)
+                                "Payment Confirmation info received from PayPal", Toast.LENGTH_LONG)
                                 .show();
 
                     } catch (Exception e) {
-                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
+                        Log.e(TAG, "A failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -419,10 +407,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalFuturePaymentActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("FuturePaymentExample", auth.toJSONObject().toString(4));
+                        Log.i("FuturePayment", auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("FuturePaymentExample", authorization_code);
+                        Log.i("FuturePayment", authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -431,14 +419,14 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("FuturePaymentExample", "an extremely unlikely failure occurred: ", e);
+                        Log.e("FuturePayment", "an extremely unlikely failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.i("FuturePaymentExample", "The user canceled.");
+                Log.i("FuturePayment", "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
                 Log.i(
-                        "FuturePaymentExample",
+                        "FuturePayment",
                         "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
             }
         } else if (requestCode == REQUEST_CODE_PROFILE_SHARING) {
@@ -447,10 +435,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalProfileSharingActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("ProfileSharingExample", auth.toJSONObject().toString(4));
+                        Log.i("ProfileSharing", auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("ProfileSharingExample", authorization_code);
+                        Log.i("ProfileSharing", authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -459,14 +447,14 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("ProfileSharingExample", "an extremely unlikely failure occurred: ", e);
+                        Log.e("ProfileSharing", "A failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.i("ProfileSharingExample", "The user canceled.");
+                Log.i("ProfileSharing", "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
                 Log.i(
-                        "ProfileSharingExample",
+                        "ProfileSharing",
                         "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
             }
         }
