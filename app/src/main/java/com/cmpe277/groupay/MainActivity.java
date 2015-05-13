@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
+import java.util.UUID;
+
 
 public class MainActivity extends Activity {
     private static final int oneSec = 1000;
@@ -99,9 +101,14 @@ public class MainActivity extends Activity {
         Data.get().getmEventList().get(0).addMember("Abraham");
         Data.get().getmEventList().get(1).addMember("Elliot");
         Data.get().getmEventList().get(1).addMember("Ryan");
-        Data.get().getmEventList().get(0).addNotify("Approve a member");
-        Data.get().getmEventList().get(0).addNotify("Vote for an Item");
-
+        UUID eventID1 = Data.get().getEvent(0).getEventID();
+        Data.get().getMe().addNewEvent(eventID1);
+        UUID eventID2 = Data.get().getEvent(1).getEventID();
+        Data.get().getMe().addNewEvent(eventID2);
+        Data.get().getMe().setNotify(eventID1,"Approved a member");
+        Data.get().getMe().setNotify(eventID1,"vote for an item");
+        Data.get().getMe().setNotify(eventID2,"An item is waiting to be bought");
+        Data.get().getMe().setNotify(eventID2,"request proof");
 
         timeHandler.postDelayed(new Runnable() {
             @Override

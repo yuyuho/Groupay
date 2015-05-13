@@ -13,16 +13,20 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 
 public class NotificationTabFragment extends Fragment {
     private static final String TAG = "NotificationTabFragment";
     private Event mEvent;
     private int mEventIdx;
+    private UUID mEventID;
 
-    public static NotificationTabFragment newInstance (int eventNum){
+    public static NotificationTabFragment newInstance (UUID eventId){
         Bundle args = new Bundle();
         NotificationTabFragment fragment = new NotificationTabFragment();
-        args.putInt(EventActivity.EVENT_INDEX,eventNum);
+        args.putSerializable(EventActivity.EVENT_UUID, eventId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -32,14 +36,13 @@ public class NotificationTabFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        if(getArguments() != null){
-            mEventIdx = getArguments().getInt(EventActivity.EVENT_INDEX);
+
+        if(getArguments() != null) {
+            mEventID = (UUID) getArguments().getSerializable(EventActivity.EVENT_UUID);
         }
-        else{
-            mEventIdx = ((EventActivity)getActivity()).getCurrentEventIndex();
+        else {
+            mEventID = ((EventActivity)getActivity()).getCurrentEventUUID();
         }
-        Log.d(TAG,"current event index "+ mEventIdx);
-        mEvent = Data.get().getEvent(mEventIdx);
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,10 +51,12 @@ public class NotificationTabFragment extends Fragment {
 
         ListView notifyListView = (ListView) v.findViewById(R.id.event_list);
 
+        ArrayList<String> notifyList = Data.get().getMe().getNotify(mEventID);
+
         NotificationListAdapter notifyArrayAdapter=
                 new NotificationListAdapter( getActivity(),
                         android.R.layout.simple_list_item_1,
-                        mEvent.getNotifyList(),
+                        notifyList,
                         BitmapFactory.decodeResource(getResources(), R.drawable.ic_note));
 
         notifyListView.setAdapter(notifyArrayAdapter);
@@ -72,7 +77,7 @@ public class NotificationTabFragment extends Fragment {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.cancel();
-                                        mEvent.deleteNotify(position);
+                                        Data.get().getMe().deleteNotify(mEventID,position);
                                     }
                                 })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -85,7 +90,7 @@ public class NotificationTabFragment extends Fragment {
             }
         });
 
-        Data.get().getEvent(mEventIdx).setNotifyListAdaptor(notifyArrayAdapter);
+        Data.get().getMe().setNotifyAdapter(mEventID,notifyArrayAdapter);
 
         return v;
     }

@@ -127,6 +127,9 @@ public class CreateEventFragment extends DialogFragment {
                                         mYear, mMonth, mDay, mEventType,
                                         Data.get().getmEventList().size());
 
+                                // The first member is the manager
+                                event.addMember(Data.get().getMyName());
+                                Data.get().getMe().addNewEvent(event.getEventID());
                                 Data.get().addEvent(event);
                             }
                         })

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by cynthia on 4/26/15.
@@ -12,6 +13,8 @@ import java.util.Date;
 public class Event {
     public enum EVENT_TYPE {open_event, close_event};
     public enum EVENT_STATUS {on_going, close};
+
+    private UUID mEventID;
     private Bitmap mEventIcon;
     private String mEventName;
     private int mEventDay;
@@ -23,20 +26,15 @@ public class Event {
 
     private ArrayList<String> mMemberList;
     private MemberListAdapter mMemberListAdaptor;
-    private ArrayList<String> mNotifyList;
-    private NotificationListAdapter mNotifyListAdaptor;
-    private String Owner; // ToDo... manage
 
     private ArrayList<Item> mItemList;
     private ItemListAdapter mItemListAdaptor;
     private String mEventModifiedTimeStamp;
     private String mItemModifiedTimeStamp;
     private String mMemberModifiedTimeStamp;
-    private String mNotifyModifiedTimeStamp;
 
     private ItemTabFragment mItemTabFragment;
     private MemberTabFragment mMemberTabFragment;
-    private NotificationTabFragment mNotificationTabFragment;
 
     public Event(Bitmap icon,
                  String name,
@@ -47,6 +45,7 @@ public class Event {
                  int eventNum){
 
         mEventName = name;
+        mEventID = UUID.randomUUID();
         mEventIcon = icon;
         mEventYear = year;
         mEventMonth = month;
@@ -57,12 +56,17 @@ public class Event {
         mEventModifiedTimeStamp = getCurrentTimeStamp();
         mItemList = new ArrayList<Item>();
         mMemberList = new ArrayList<String>();
-        mNotifyList = new ArrayList<String>();
         mItemTabFragment = ItemTabFragment.newInstance(eventNum);
         mMemberTabFragment = MemberTabFragment.newInstance(eventNum);
-        mNotificationTabFragment = NotificationTabFragment.newInstance(eventNum);
     }
 
+    public UUID getEventID() {
+        return mEventID;
+    }
+
+    public void setEventID(UUID mEventID) {
+        this.mEventID = mEventID;
+    }
     public Bitmap getmEventIcon() {
         return mEventIcon;
     }
@@ -189,31 +193,6 @@ public class Event {
         this.mMemberListAdaptor = mListAdaptor;
     }
 
-    // Functions to take care of Notification List
-    public ArrayList<String> getNotifyList(){
-        return mNotifyList;
-    }
-    public void addNotify(String name){
-        mNotifyList.add(name);
-        mNotifyModifiedTimeStamp = getCurrentTimeStamp();
-        if (mNotifyListAdaptor != null) {
-            mNotifyListAdaptor.notifyDataSetChanged();
-        }
-    }
-    public void deleteNotify(int position){
-        mNotifyList.remove(position);
-        mNotifyModifiedTimeStamp = getCurrentTimeStamp();
-        if (mNotifyListAdaptor != null) {
-            mNotifyListAdaptor.notifyDataSetChanged();
-        }
-    }
-    public NotificationListAdapter getNotifyListAdaptor() {
-        return mNotifyListAdaptor;
-    }
-
-    public void setNotifyListAdaptor(NotificationListAdapter mListAdaptor) {
-        this.mNotifyListAdaptor = mListAdaptor;
-    }
     public ItemTabFragment getmItemTabFragment() {
         return mItemTabFragment;
     }
@@ -227,14 +206,6 @@ public class Event {
 
     public void setmMemberTabFragment(MemberTabFragment mMemberTabFragment) {
         this.mMemberTabFragment = mMemberTabFragment;
-    }
-
-    public NotificationTabFragment getmNotificationTabFragment() {
-        return mNotificationTabFragment;
-    }
-
-    public void setmNotificationTabFragment(NotificationTabFragment mNotificationTabFragment) {
-        this.mNotificationTabFragment = mNotificationTabFragment;
     }
 
     public static String getCurrentTimeStamp(){

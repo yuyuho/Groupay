@@ -88,9 +88,11 @@ public class ItemTabFragment extends Fragment {
         mEvent = Data.get().getEvent(mEventIdx);
 
         // start paypal intent
-        Intent intent = new Intent(ItemTabFragment.this.getActivity(), PayPalService.class);
-        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
-        ItemTabFragment.this.getActivity().startService(intent);
+        if(mEvent.getEventStatus() == Event.EVENT_STATUS.close) {
+            Intent intent = new Intent(ItemTabFragment.this.getActivity(), PayPalService.class);
+            intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
+            ItemTabFragment.this.getActivity().startService(intent);
+        }
     }
 
     @Override
@@ -109,10 +111,10 @@ public class ItemTabFragment extends Fragment {
 
         Log.d(TAG, "I see " + mEventIdx);
         if(mEvent.getEventStatus() == Event.EVENT_STATUS.close){
-            youOweButton.setVisibility(View.INVISIBLE);
+            youOweButton.setVisibility(View.VISIBLE);
         }
         else{
-            youOweButton.setVisibility(View.VISIBLE);
+            youOweButton.setVisibility(View.INVISIBLE);
         }
 
         youOweButton.setOnClickListener(new View.OnClickListener() {
