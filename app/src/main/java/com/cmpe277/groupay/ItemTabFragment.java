@@ -187,6 +187,7 @@ public class ItemTabFragment extends Fragment {
                                                 dialog.cancel();
                                                 item.setItemStatus(Item.itemStatusEnum.waitToBeBuy);
                                                 item.setItemOwnership(Data.get().getMyName());
+                                                mEvent.getItemListAdaptor().notifyDataSetChanged();
                                             }
                                         })
                                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -214,34 +215,40 @@ public class ItemTabFragment extends Fragment {
                     fragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
                     break;
                 case waitToBeBuy:
-                    //TODO need to check if the person who browse this info is the owner or not
-                    LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-                    View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
-                    TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
-                    textView.setText(getResources().getText(R.string.have_you_bought));
+                    if (Data.get().getMe().getMyName() == item.getItemFinalInfo().getMemberName()) {
+                        LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+                        View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
+                        TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
+                        textView.setText(getResources().getText(R.string.have_you_bought));
 
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
-                    dialogBuilder.setView(newItemView);
-                    dialogBuilder
-                            .setPositiveButton("Yes",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            BuyItemFragment buyItemFragment
-                                                    = BuyItemFragment.newInstance(mEventIdx, position);
-                                            buyItemFragment.show(fm, BUY_DIALOG_TAG);
-                                        }
-                                    })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ItemInfoDisplayFragment infoDisplayFragment
-                                            = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
-                                    infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
-                                }
-                            });
-                    dialogBuilder.create().show();
+                        dialogBuilder.setView(newItemView);
+                        dialogBuilder
+                                .setPositiveButton("Yes",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                BuyItemFragment buyItemFragment
+                                                        = BuyItemFragment.newInstance(mEventIdx, position);
+                                                buyItemFragment.show(fm, BUY_DIALOG_TAG);
+                                            }
+                                        })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ItemInfoDisplayFragment infoDisplayFragment
+                                                = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
+                                        infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
+                                    }
+                                });
+                        dialogBuilder.create().show();
+                    }
+                    else{
+                        ItemInfoDisplayFragment infoDisplayFragment
+                                = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
+                        infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
+                    }
                     break;
                 case requestProof:
                     BuyItemFragment buyItemFragment
@@ -322,8 +329,7 @@ public class ItemTabFragment extends Fragment {
         return true;
     }
     private boolean requestForApproval(int position){
-        //TODO need to check ownership?
-        //if (!manager) return true;
+        if (Data.get().getMe().getMyName() != mEvent.getMemberList().get(0)) return false;
 
         final Item item = mEvent.getItemAtIndex(position);
         LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
@@ -356,7 +362,7 @@ public class ItemTabFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 item.setItemStatus(Item.itemStatusEnum.approved);
                                 Data.get().getEvent(mEventIdx)
-                                        .addEventExpense(item.getItemBought().getItemPrice());
+                                        .addEventExpense(item.getItemFinalInfo().getItemPrice());
                                 Data.get().getEvent(mEventIdx).getItemListAdaptor().notifyDataSetChanged();
                             }
                         });

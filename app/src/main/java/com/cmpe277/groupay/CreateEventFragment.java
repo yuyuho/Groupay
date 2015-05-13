@@ -37,12 +37,10 @@ public class CreateEventFragment extends DialogFragment {
     private Bitmap mEventIcon;
     private EditText mEventName;
     private EditText mEventDate;
-    private CheckBox mOpenCheckBox;
 
     public int mDay;
     public int mMonth;
     public int mYear;
-    public Event.EVENT_TYPE mEventType;
 
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -63,7 +61,6 @@ public class CreateEventFragment extends DialogFragment {
         mEventImageButton = (ImageButton) newItemView.findViewById(R.id.event_icon_selector);
         mEventName = (EditText) newItemView.findViewById(R.id.new_event_edit_text);
         mEventDate = (EditText) newItemView.findViewById(R.id.new_event_edit_date);
-        mOpenCheckBox = (CheckBox) newItemView.findViewById(R.id.open_check_box);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
@@ -104,17 +101,6 @@ public class CreateEventFragment extends DialogFragment {
             }
         });
 
-        mOpenCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    mEventType = Event.EVENT_TYPE.open_event;
-                }
-                else{
-                    mEventType = Event.EVENT_TYPE.close_event;
-                }
-            }
-        });
         dialogBuilder.setView(newItemView);
         dialogBuilder
                 .setPositiveButton("Enter",
@@ -122,13 +108,13 @@ public class CreateEventFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
-                                Event event = new Event(mEventIcon,
+                                Event event = new Event(
+                                        Data.get().getMyName(),
+                                        mEventIcon,
                                         mEventName.getText().toString(),
-                                        mYear, mMonth, mDay, mEventType,
+                                        mYear, mMonth, mDay,
                                         Data.get().getmEventList().size());
 
-                                // The first member is the manager
-                                event.addMember(Data.get().getMyName());
                                 Data.get().getMe().addNewEvent(event.getEventID());
                                 Data.get().addEvent(event);
                             }
@@ -152,7 +138,6 @@ public class CreateEventFragment extends DialogFragment {
         mEventIcon = BitmapFactory.decodeResource(getResources(),R.mipmap.ic_logo2);
         mEventName.setText("");
         mEventDate.setText(mMonth + "/" + mDay + "/" + mYear);
-        mOpenCheckBox.setChecked(true);
     }
     public void onActivityResult (int requestCode, int resultCode, Intent imageReturnIntent){
         super.onActivityResult(requestCode, resultCode, imageReturnIntent);

@@ -18,8 +18,6 @@
             android:id ="@+id/price_edit_text"
             android:layout_height="wrap_content"
             android:layout_width="100dp"
-            android:paddingLeft="50dp"
-            android:paddingRight="40dp"
             android:inputType="number|numberDecimal"
             android:textSize="20sp"/>
     </LinearLayout>

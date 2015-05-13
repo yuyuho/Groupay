@@ -11,7 +11,6 @@ import java.util.UUID;
  * Created by cynthia on 4/26/15.
  */
 public class Event {
-    public enum EVENT_TYPE {open_event, close_event};
     public enum EVENT_STATUS {on_going, close};
 
     private UUID mEventID;
@@ -20,7 +19,6 @@ public class Event {
     private int mEventDay;
     private int mEventMonth;
     private int mEventYear;
-    private EVENT_TYPE mEventType;
     private double mEventExpense; //TODO need to record the calculate the total
     private EVENT_STATUS mEventStatus;
 
@@ -36,12 +34,12 @@ public class Event {
     private ItemTabFragment mItemTabFragment;
     private MemberTabFragment mMemberTabFragment;
 
-    public Event(Bitmap icon,
+    public Event( String managerName,
+                 Bitmap icon,
                  String name,
                  int year,
                  int month,
                  int day,
-                 EVENT_TYPE eventType,
                  int eventNum){
 
         mEventName = name;
@@ -50,7 +48,6 @@ public class Event {
         mEventYear = year;
         mEventMonth = month;
         mEventDay = day;
-        mEventType = eventType;
         mEventExpense = 0;
         mEventStatus = EVENT_STATUS.on_going;
         mEventModifiedTimeStamp = getCurrentTimeStamp();
@@ -58,6 +55,8 @@ public class Event {
         mMemberList = new ArrayList<String>();
         mItemTabFragment = ItemTabFragment.newInstance(eventNum);
         mMemberTabFragment = MemberTabFragment.newInstance(eventNum);
+        
+        mMemberList.add(managerName);
     }
 
     public UUID getEventID() {

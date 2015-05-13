@@ -34,8 +34,8 @@ public class MainActivity extends Activity {
         ///////////////////Hack
         Bitmap icon =  BitmapFactory.decodeResource(getResources(), R.mipmap.ic_logo2);
 
-        Data.get().getmEventList().add(new Event( icon, "Birthday", 2000, 10, 2, Event.EVENT_TYPE.open_event, Data.get().getmEventList().size()));
-        Data.get().getmEventList().add(new Event( icon, "ToyRus", 2015, 12, 1, Event.EVENT_TYPE.open_event, Data.get().getmEventList().size()));
+        Data.get().getmEventList().add(new Event( Data.get().getMyName(), icon, "Birthday", 2000, 10, 2, Data.get().getmEventList().size()));
+        Data.get().getmEventList().add(new Event( "Ryan", icon, "ToyRus", 2015, 12, 1, Data.get().getmEventList().size()));
 
 
         Data.get().getmEventList().get(0).addItem( new Item("Cake"));
@@ -100,12 +100,10 @@ public class MainActivity extends Activity {
         Data.get().getmEventList().get(0).addMember("Cynthia");
         Data.get().getmEventList().get(0).addMember("Abraham");
         Data.get().getmEventList().get(1).addMember("Elliot");
-        Data.get().getmEventList().get(1).addMember("Ryan");
         UUID eventID1 = Data.get().getEvent(0).getEventID();
         Data.get().getMe().addNewEvent(eventID1);
         UUID eventID2 = Data.get().getEvent(1).getEventID();
         Data.get().getMe().addNewEvent(eventID2);
-        Data.get().getMe().setNotify(eventID1,"Approved a member");
         Data.get().getMe().setNotify(eventID1,"vote for an item");
         Data.get().getMe().setNotify(eventID2,"An item is waiting to be bought");
         Data.get().getMe().setNotify(eventID2,"request proof");
@@ -128,18 +126,4 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

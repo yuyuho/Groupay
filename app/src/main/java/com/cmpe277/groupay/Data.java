@@ -38,13 +38,20 @@ public class Data {
     public String getMyName() {
         return mMe.getMyName();
     }
+    public void setMyName(String myName) {
+
+        if(mMe == null){
+            mMe = new Member();
+        }
+        else{
+            mMe.setMyName(myName);
+        }
+    }
 
     public void addEvent(Event newEvent){
         mEventList.add(newEvent);
         mEventListModifiedTimeStamp = getCurrentTimeStamp();
         if(this.mEventListAdaptor != null ) {
-
-            Log.d(TAG,"EVEEE + " + this.mEventListAdaptor);
             this.mEventListAdaptor.notifyDataSetChanged();
         }
     }

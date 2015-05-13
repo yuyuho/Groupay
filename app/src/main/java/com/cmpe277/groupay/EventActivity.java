@@ -108,9 +108,6 @@ public class EventActivity extends ActionBarActivity implements TabHost.OnTabCha
                 dialogBuilder.create().show();
 
                 return true;
-            case R.id.action_settings:
-                return true;
-
         }
 
 

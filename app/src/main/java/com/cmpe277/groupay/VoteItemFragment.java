@@ -22,6 +22,7 @@ public class VoteItemFragment extends DialogFragment {
     private int mEventIdx;
     private int mItemIdx;
     private Item mItem;
+    private Event mEvent;
     private int mOption;
 
     static VoteItemFragment newInstance( int eventIdx, int itemIdx){
@@ -43,7 +44,8 @@ public class VoteItemFragment extends DialogFragment {
 
         mEventIdx = getArguments().getInt(ItemInfoActivity.EVENT_INDEX);
         mItemIdx = getArguments().getInt(ItemInfoActivity.ITEM_INDEX);
-        mItem = Data.get().getEvent(mEventIdx).getItemAtIndex(mItemIdx);
+        mEvent= Data.get().getEvent(mEventIdx);
+        mItem = mEvent.getItemAtIndex(mItemIdx);
         ArrayList<ItemInfo> itemInfoList = mItem.getItemInfoList();
 
         for (int i = 0; i < itemInfoList.size(); i++) {
@@ -74,11 +76,15 @@ public class VoteItemFragment extends DialogFragment {
         }
     }
     public class positionClickListener implements DialogInterface.OnClickListener{
+        ItemInfo itemInfo;
+        UUID eventId;
+        UUID itemId;
+
         @Override
         public void onClick(DialogInterface dialog, int id) {
-            ItemInfo itemInfo = mItem.getItemInfoList().get(mSelectedItem);
-            UUID eventId = Data.get().getEvent(mEventIdx).getEventID();
-            UUID itemId = Data.get().getEvent(mEventIdx).getItemAtIndex(mItemIdx).getItemID();
+            itemInfo = mItem.getItemInfoList().get(mSelectedItem);
+            eventId = mEvent.getEventID();
+            itemId = mItem.getItemID();
             if (mOption == -1) {
                 itemInfo.setNumOfVote(itemInfo.getNumOfVote() + 1);
                 mItem.addVote();
@@ -97,8 +103,36 @@ public class VoteItemFragment extends DialogFragment {
 
                 }
                 Data.get().getMe().addVote(eventId, itemId, mSelectedItem);
+
             }
-            Data.get().getEvent(mEventIdx).getItemAtIndex(mItemIdx).getItemInfoListAdaptor().notifyDataSetChanged();
+            checkAllVote();
+            mItem.getItemInfoListAdaptor().notifyDataSetChanged();
+        }
+
+        private void checkAllVote(){
+            int totalVote = mItem.getTotalNumOfVote();
+            int numberOfMember = mEvent.getMemberList().size();
+            ItemInfo highestVote = null;
+            Log.d(TAG, " Total Vote " + totalVote + "Number of Member "+ numberOfMember);
+
+            if (totalVote == numberOfMember){
+                for (ItemInfo info: mItem.getItemInfoList()){
+                    if (highestVote == null){
+                        highestVote = info;
+                    }
+                    else if (highestVote.getNumOfVote() < info.getNumOfVote()){
+                        highestVote = info;
+                    }
+                }
+
+                mItem.setItemFinalInfo(highestVote);
+                mItem.setItemStatus(Item.itemStatusEnum.waitToBeBuy);
+                mEvent.getItemListAdaptor().notifyDataSetChanged();
+
+                getActivity().onBackPressed();
+            }
         }
     }
+
+
 }

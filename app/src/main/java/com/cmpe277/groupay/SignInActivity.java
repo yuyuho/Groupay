@@ -10,18 +10,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 
 public class SignInActivity extends ActionBarActivity {
 
     private Toolbar mToolbar;
     private Button mSignInButton;
+    private EditText mUserName;
+    private EditText mPassword;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mSignInButton = (Button) findViewById(R.id.signin_button);
+        mUserName = (EditText) findViewById(R.id.user_name_view);
+        mPassword = (EditText) findViewById(R.id.password_view);
 
         if(mToolbar != null) {
             mToolbar.setLogo(R.mipmap.ic_logo);
@@ -36,6 +41,7 @@ public class SignInActivity extends ActionBarActivity {
                 //Check User identity here
 
                 // If pass
+                Data.get().getMe().setMyName(mUserName.getText().toString());
                 Intent i = new Intent(SignInActivity.this, EventListActivity.class);
                 startActivity(i);
                 
@@ -51,18 +57,4 @@ public class SignInActivity extends ActionBarActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

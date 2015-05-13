@@ -84,8 +84,6 @@ public class ItemInfoActivity extends ActionBarActivity {
                         = SuggestItemInfoFragment.newInstance(mEventIndex,mItemIndex);
                 suggestItemInfoFragment.show(fm, SUGGEST_DIALOG_TAG);
                 break;
-            case R.id.action_settings:
-                break;
         }
 
         return super.onOptionsItemSelected(item);

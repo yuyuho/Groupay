@@ -11,15 +11,19 @@ public class Member {
     private ArrayList<myEvent> myEventList;
 
     public Member(){
-        mMyName = "YUYU";
+        mMyName = "YuYu";
         myEventList = new ArrayList<myEvent>();
     }
     public Member(String myName){
         mMyName = myName;
         myEventList = new ArrayList<myEvent>();
     }
+
     public String getMyName(){
         return mMyName;
+    }
+    public void setMyName(String myName){
+        mMyName = myName;
     }
 
     public void addNewEvent(UUID eventID){
