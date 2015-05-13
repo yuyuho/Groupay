@@ -58,7 +58,7 @@
 
     <string name="mark_event_done">Should this event mark as done?</string>
     <string name="would_you_delete_notify">Would you like to delete this notification?</string>
-    <string name="you_owe">You owe</string>
+    <string name="you_owe_money">You owe money</string>
     <string name="would_like_to_join">Would you like to join this event?</string>
 
 

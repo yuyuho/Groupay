@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,7 +54,7 @@ public class ItemTabFragment extends Fragment {
     //paypal stuffs
     private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_NO_NETWORK;
     //private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_SANDBOX;
-    private static final String CONFIG_CLIENT_ID = "ahruizguerra-facilitator@hotmail.com";
+    private static final String CONFIG_CLIENT_ID = "AeKSwZLUO3CrIl2kJMGOCtoPJ6An7_e3p8cCB_vxIFbPLLdNuUce3JElKkosSmKachB2dPC2GWU3lJ5q";
 
     private static final int REQUEST_CODE_PAYMENT = 1;
     private static final int REQUEST_CODE_FUTURE_PAYMENT = 2;
@@ -62,10 +63,7 @@ public class ItemTabFragment extends Fragment {
     private static PayPalConfiguration config = new PayPalConfiguration()
             .environment(CONFIG_ENVIRONMENT)
             .clientId(CONFIG_CLIENT_ID)
-                    // The following are only used in PayPalFuturePaymentActivity.
-            .merchantName("Example Merchant")
-            .merchantPrivacyPolicyUri(Uri.parse("https://www.example.com/privacy"))
-            .merchantUserAgreementUri(Uri.parse("https://www.example.com/legal"));
+            .acceptCreditCards(true);
 
     public static ItemTabFragment newInstance (int eventNum){
         Bundle args = new Bundle();
@@ -368,8 +366,9 @@ public class ItemTabFragment extends Fragment {
 
     // paypal private functions
     private PayPalPayment getThingToBuy(String paymentIntent) {
-        return new PayPalPayment(new BigDecimal("1.75"), "USD", "sample item",
-                paymentIntent);
+        float amount = Data.get().getMe().getExpense(Data.get().getEvent(mEventIdx).getEventID());
+        Log.e(TAG, "amount to pay: " + String.valueOf(amount) );
+        return new PayPalPayment(new BigDecimal(String.valueOf(amount + 5)), "USD","sample item",paymentIntent);
     }
 
     private PayPalOAuthScopes getOauthScopes() {
@@ -389,7 +388,7 @@ public class ItemTabFragment extends Fragment {
                     try {
                         Toast.makeText(
                                 ItemTabFragment.this.getActivity(),
-                                "Payment Confirmation info received from PayPal", Toast.LENGTH_LONG)
+                                "Payment Successful using PayPal.", Toast.LENGTH_LONG)
                                 .show();
 
                     } catch (Exception e) {
@@ -399,9 +398,7 @@ public class ItemTabFragment extends Fragment {
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Log.i(TAG, "The user canceled.");
             } else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        TAG,
-                        "An invalid Payment or PayPalConfiguration was submitted. Please see the docs.");
+                Log.i(TAG, "An invalid Payment or PayPalConfiguration was submitted.");
             }
         } else if (requestCode == REQUEST_CODE_FUTURE_PAYMENT) {
             if (resultCode == Activity.RESULT_OK) {
@@ -409,10 +406,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalFuturePaymentActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("FuturePayment", auth.toJSONObject().toString(4));
+                        Log.i(TAG, auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("FuturePayment", authorization_code);
+                        Log.i(TAG, authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -421,15 +418,13 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("FuturePayment", "an extremely unlikely failure occurred: ", e);
+                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Log.i("FuturePayment", "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        "FuturePayment",
-                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+                Log.i(TAG,"Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration.");
             }
         } else if (requestCode == REQUEST_CODE_PROFILE_SHARING) {
             if (resultCode == Activity.RESULT_OK) {
@@ -437,10 +432,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalProfileSharingActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("ProfileSharing", auth.toJSONObject().toString(4));
+                        Log.i(TAG, auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("ProfileSharing", authorization_code);
+                        Log.i(TAG, authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -449,21 +444,20 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("ProfileSharing", "A failure occurred: ", e);
+                        Log.e(TAG, "A failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.i("ProfileSharing", "The user canceled.");
+                Log.i(TAG, "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        "ProfileSharing",
-                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+                Log.i(TAG, "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration.");
             }
         }
     }
 
     private void sendAuthorizationToServer(PayPalAuthorization authorization) {
-        ;
+        ; // nothing to sent yet since we are using PayPalConfiguration.ENVIRONMENT_NO_NETWORK; for the purpose of testing
     }
+
 
 }
