@@ -118,7 +118,6 @@ public class ItemTabFragment extends Fragment {
         youOweButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO go to paypal api
                 PayPalPayment thingToBuy = getThingToBuy(PayPalPayment.PAYMENT_INTENT_SALE);
                 Intent intent = new Intent(v.getContext(), PaymentActivity.class);
 
