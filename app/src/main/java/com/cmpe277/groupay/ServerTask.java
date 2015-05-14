@@ -64,7 +64,19 @@ public class ServerTask extends AsyncTask <String, Void, String>
             // Increase performance/ prevent exhaust res, stops Android from buffering the complete request body in memory before it is transmitted
                 connect.setChunkedStreamingMode(0);  // Used when string length unknown
                 // setFixedLengthStreamingMode(int) // Can use this when string length known
-            
+
+
+            //Things we need to pass with the POST request ////////// NEED TO GET VALUES FROM LOGIN AND .......
+                //BasicNameValuePair usernameBasicNameValuePair = new BasicNameValuePair("paramUsername", paramUsername);
+                //BasicNameValuePair passwordBasicNameValuePAir = new BasicNameValuePair("paramPassword", paramPassword);
+
+            // Add the content that we want to pass with the POST request to as name-value pairs
+            //Put sending details to an ArrayList with type safe of NameValuePair
+            List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>();
+            //nameValuePair.add(usernameBasicNameValuePair);
+            //nameValuePair.add(passwordBasicNameValuePAir);
+
+
             //Send POST  request to server
             PrintWriter output = new PrintWriter(connect.getOutputStream());
             output.print(request);
