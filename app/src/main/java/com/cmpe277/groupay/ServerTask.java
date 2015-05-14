@@ -46,7 +46,7 @@ public class ServerTask extends AsyncTask <String, Void, String>
     public String doInBackground(String... request) {
         if (request[0].toString().compareTo("login") == 0) {
             String result = login(request[1], request[2]);
-            if (result.compareTo("Password is incorrect") == 0) {
+            if (result.compareTo("Password is incorrect") == 0 || result.compareTo("Could not complete query. Missing parameter") == 0) {
                 return "login failed";
             }else {
                 return "login success";
