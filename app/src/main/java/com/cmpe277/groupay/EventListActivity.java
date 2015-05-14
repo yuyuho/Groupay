@@ -67,10 +67,7 @@ public class EventListActivity extends ActionBarActivity
                 CreateEventFragment fragment = new CreateEventFragment();
                 fragment.show(fm, CREATE_EVENT_DIALOG_TAG);
                 return true;
-
-
         }
-
         return super.onOptionsItemSelected(item);
     }
 
