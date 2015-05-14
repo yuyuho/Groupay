@@ -1,5 +1,8 @@
 package com.cmpe277.groupay;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,12 +24,15 @@ import java.util.Scanner;
 public class ServerTask extends AsyncTask <String, Void, String>
 {
     private static final String TAG = "ServerTask";
+    private static final String CONNECTION_FAIL = "Connection Fail";
     // Declare AsyncResponse interface
     public AsyncResponse delegate = null;
     public static ServerTask task;
+    private Context mContext;
 
-    public ServerTask(AsyncResponse asyncResponse){
+    public ServerTask(Context context, AsyncResponse asyncResponse){
         delegate = asyncResponse;
+        mContext = context;
     }
     @Override
     public String doInBackground(String... request)
@@ -79,11 +85,11 @@ public class ServerTask extends AsyncTask <String, Void, String>
         }
         catch (SocketException e){
             Log.e(TAG, e.toString());
-            delegate.connectionFail();
+            return CONNECTION_FAIL;
         }
         catch (IOException e) {
             Log.e(TAG, e.toString());
-            delegate.connectionFail();
+            return CONNECTION_FAIL;
         }
         return received;
     }
@@ -92,7 +98,21 @@ public class ServerTask extends AsyncTask <String, Void, String>
     @Override
     protected void onPostExecute(String result) {
         // send result to interface fn. // causes crash //
-        delegate.taskFinish(result);
+        if (result ==  CONNECTION_FAIL){
+
+            Log.e(TAG, "Connection Fail");
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage("Connection Fail")
+                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).create().show();
+        }
+        else {
+            delegate.taskFinish(result);
+        }
 
     }
 

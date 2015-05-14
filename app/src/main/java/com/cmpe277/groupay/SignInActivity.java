@@ -48,17 +48,13 @@ public class SignInActivity extends ActionBarActivity {
             public void onClick(View v) {
                 //Check User identity here
                 String serverMsg = mUserName.getText().toString() + " " +mPassword.getText().toString();
-                ServerTask serverTask = new ServerTask(new AsyncResponse() {
+                ServerTask serverTask = new ServerTask(SignInActivity.this, new AsyncResponse() {
                     @Override
                     public void taskFinish(String output) {
                         Log.d(TAG, "Response from task: " + output);
                         signInSuccessful(true);
                     }
 
-                    @Override
-                    public void connectionFail() {
-                        Log.e(TAG, "Connection Fail");
-                    }
                 });
                 serverTask.execute(serverMsg);
 
