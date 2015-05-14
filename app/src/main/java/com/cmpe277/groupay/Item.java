@@ -80,10 +80,7 @@ public class Item{
             mItemInfoListAdaptor.notifyDataSetChanged();
         }
     }
-    public ItemInfo getItemBought(){
-        if(mItemInfoList.size() == 0) return null;
-        return mItemInfoList.get(0);
-    }
+
     public void setItemOwnership(String member){
         mItemFinalInfo.setMemberName(member);
     }

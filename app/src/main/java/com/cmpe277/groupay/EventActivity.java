@@ -18,11 +18,13 @@ import android.widget.EditText;
 import android.widget.TabHost;
 
 import java.lang.reflect.Member;
+import java.util.UUID;
 
 
 public class EventActivity extends ActionBarActivity implements TabHost.OnTabChangeListener {
     private static final String TAG = "EventActivity";
-    public static final String EVENT_INDEX ="event Idex";
+    public static final String EVENT_INDEX ="event Index";
+    public static final String EVENT_UUID ="event UUID";
     private Toolbar mToolbar;
     private TabHost mTabHost;
 
@@ -106,9 +108,6 @@ public class EventActivity extends ActionBarActivity implements TabHost.OnTabCha
                 dialogBuilder.create().show();
 
                 return true;
-            case R.id.action_settings:
-                return true;
-
         }
 
 
@@ -132,8 +131,15 @@ public class EventActivity extends ActionBarActivity implements TabHost.OnTabCha
                     .replace(android.R.id.tabcontent, memberTabFragment)
                     .commit();
         } else if (mTabHost.getCurrentTab() == 2) {
+            /*
             NotificationTabFragment notificationTabFragment
                     = Data.get().getEvent(mEventIndex).getmNotificationTabFragment();;
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.tabcontent, notificationTabFragment)
+                    .commit();
+                    */
+            NotificationTabFragment notificationTabFragment
+                    = new NotificationTabFragment().newInstance(Data.get().getEvent(mEventIndex).getEventID());
             getSupportFragmentManager().beginTransaction()
                     .replace(android.R.id.tabcontent, notificationTabFragment)
                     .commit();
@@ -141,5 +147,8 @@ public class EventActivity extends ActionBarActivity implements TabHost.OnTabCha
     }
     public int getCurrentEventIndex(){
         return mEventIndex;
+    }
+    public UUID getCurrentEventUUID(){
+        return Data.get().getEvent(mEventIndex).getEventID();
     }
 }

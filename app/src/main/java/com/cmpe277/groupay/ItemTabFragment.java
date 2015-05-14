@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,7 +54,7 @@ public class ItemTabFragment extends Fragment {
     //paypal stuffs
     private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_NO_NETWORK;
     //private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_SANDBOX;
-    private static final String CONFIG_CLIENT_ID = "ahruizguerra-facilitator@hotmail.com";
+    private static final String CONFIG_CLIENT_ID = "AeKSwZLUO3CrIl2kJMGOCtoPJ6An7_e3p8cCB_vxIFbPLLdNuUce3JElKkosSmKachB2dPC2GWU3lJ5q";
 
     private static final int REQUEST_CODE_PAYMENT = 1;
     private static final int REQUEST_CODE_FUTURE_PAYMENT = 2;
@@ -62,10 +63,7 @@ public class ItemTabFragment extends Fragment {
     private static PayPalConfiguration config = new PayPalConfiguration()
             .environment(CONFIG_ENVIRONMENT)
             .clientId(CONFIG_CLIENT_ID)
-                    // The following are only used in PayPalFuturePaymentActivity.
-            .merchantName("Example Merchant")
-            .merchantPrivacyPolicyUri(Uri.parse("https://www.example.com/privacy"))
-            .merchantUserAgreementUri(Uri.parse("https://www.example.com/legal"));
+            .acceptCreditCards(true);
 
     public static ItemTabFragment newInstance (int eventNum){
         Bundle args = new Bundle();
@@ -88,9 +86,11 @@ public class ItemTabFragment extends Fragment {
         mEvent = Data.get().getEvent(mEventIdx);
 
         // start paypal intent
-        Intent intent = new Intent(ItemTabFragment.this.getActivity(), PayPalService.class);
-        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
-        ItemTabFragment.this.getActivity().startService(intent);
+        if(mEvent.getEventStatus() == Event.EVENT_STATUS.close) {
+            Intent intent = new Intent(ItemTabFragment.this.getActivity(), PayPalService.class);
+            intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
+            ItemTabFragment.this.getActivity().startService(intent);
+        }
     }
 
     @Override
@@ -186,6 +186,7 @@ public class ItemTabFragment extends Fragment {
                                                 dialog.cancel();
                                                 item.setItemStatus(Item.itemStatusEnum.waitToBeBuy);
                                                 item.setItemOwnership(Data.get().getMyName());
+                                                mEvent.getItemListAdaptor().notifyDataSetChanged();
                                             }
                                         })
                                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -213,34 +214,40 @@ public class ItemTabFragment extends Fragment {
                     fragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
                     break;
                 case waitToBeBuy:
-                    //TODO need to check if the person who browse this info is the owner or not
-                    LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-                    View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
-                    TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
-                    textView.setText(getResources().getText(R.string.have_you_bought));
+                    if (Data.get().getMe().getMyName() == item.getItemFinalInfo().getMemberName()) {
+                        LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+                        View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
+                        TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
+                        textView.setText(getResources().getText(R.string.have_you_bought));
 
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
-                    dialogBuilder.setView(newItemView);
-                    dialogBuilder
-                            .setPositiveButton("Yes",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            BuyItemFragment buyItemFragment
-                                                    = BuyItemFragment.newInstance(mEventIdx, position);
-                                            buyItemFragment.show(fm, BUY_DIALOG_TAG);
-                                        }
-                                    })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ItemInfoDisplayFragment infoDisplayFragment
-                                            = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
-                                    infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
-                                }
-                            });
-                    dialogBuilder.create().show();
+                        dialogBuilder.setView(newItemView);
+                        dialogBuilder
+                                .setPositiveButton("Yes",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                BuyItemFragment buyItemFragment
+                                                        = BuyItemFragment.newInstance(mEventIdx, position);
+                                                buyItemFragment.show(fm, BUY_DIALOG_TAG);
+                                            }
+                                        })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ItemInfoDisplayFragment infoDisplayFragment
+                                                = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
+                                        infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
+                                    }
+                                });
+                        dialogBuilder.create().show();
+                    }
+                    else{
+                        ItemInfoDisplayFragment infoDisplayFragment
+                                = ItemInfoDisplayFragment.newInstance(mEventIdx, position, -1, false);
+                        infoDisplayFragment.show(fm, ITEM_BOUGHT_DIALOG_TAG);
+                    }
                     break;
                 case requestProof:
                     BuyItemFragment buyItemFragment
@@ -321,8 +328,7 @@ public class ItemTabFragment extends Fragment {
         return true;
     }
     private boolean requestForApproval(int position){
-        //TODO need to check ownership?
-        //if (!manager) return true;
+        if (Data.get().getMe().getMyName() != mEvent.getMemberList().get(0)) return false;
 
         final Item item = mEvent.getItemAtIndex(position);
         LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
@@ -355,19 +361,19 @@ public class ItemTabFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 item.setItemStatus(Item.itemStatusEnum.approved);
                                 Data.get().getEvent(mEventIdx)
-                                        .addEventExpense(item.getItemBought().getItemPrice());
+                                        .addEventExpense(item.getItemFinalInfo().getItemPrice());
                                 Data.get().getEvent(mEventIdx).getItemListAdaptor().notifyDataSetChanged();
                             }
                         });
         dialogBuilder.create().show();
         return true;
-
     }
 
     // paypal private functions
     private PayPalPayment getThingToBuy(String paymentIntent) {
-        return new PayPalPayment(new BigDecimal("1.75"), "USD", "sample item",
-                paymentIntent);
+        float amount = Data.get().getMe().getExpense(Data.get().getEvent(mEventIdx).getEventID());
+        Log.e(TAG, "amount to pay: " + String.valueOf(amount) );
+        return new PayPalPayment(new BigDecimal(String.valueOf(amount + 5)), "USD","sample item",paymentIntent);
     }
 
     private PayPalOAuthScopes getOauthScopes() {
@@ -385,32 +391,19 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
                 if (confirm != null) {
                     try {
-                        //Log.i(TAG, confirm.toJSONObject().toString(4));
-                       // Log.i(TAG, confirm.getPayment().toJSONObject().toString(4));
-                        /*
-                         *  TODO: send 'confirm' (and possibly confirm.getPayment() to your server for verification
-                         * or consent completion.
-                         * See https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
-                         * for more details.
-                         *
-                         * For sample mobile backend interactions, see
-                         * https://github.com/paypal/rest-api-sdk-python/tree/master/samples/mobile_backend
-                         */
                         Toast.makeText(
                                 ItemTabFragment.this.getActivity(),
-                                "PaymentConfirmation info received from PayPal", Toast.LENGTH_LONG)
+                                "Payment Successful using PayPal.", Toast.LENGTH_LONG)
                                 .show();
 
                     } catch (Exception e) {
-                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
+                        Log.e(TAG, "A failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Log.i(TAG, "The user canceled.");
             } else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        TAG,
-                        "An invalid Payment or PayPalConfiguration was submitted. Please see the docs.");
+                Log.i(TAG, "An invalid Payment or PayPalConfiguration was submitted.");
             }
         } else if (requestCode == REQUEST_CODE_FUTURE_PAYMENT) {
             if (resultCode == Activity.RESULT_OK) {
@@ -418,10 +411,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalFuturePaymentActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("FuturePaymentExample", auth.toJSONObject().toString(4));
+                        Log.i(TAG, auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("FuturePaymentExample", authorization_code);
+                        Log.i(TAG, authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -430,15 +423,13 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("FuturePaymentExample", "an extremely unlikely failure occurred: ", e);
+                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.i("FuturePaymentExample", "The user canceled.");
+                Log.i("FuturePayment", "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        "FuturePaymentExample",
-                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+                Log.i(TAG,"Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration.");
             }
         } else if (requestCode == REQUEST_CODE_PROFILE_SHARING) {
             if (resultCode == Activity.RESULT_OK) {
@@ -446,10 +437,10 @@ public class ItemTabFragment extends Fragment {
                         data.getParcelableExtra(PayPalProfileSharingActivity.EXTRA_RESULT_AUTHORIZATION);
                 if (auth != null) {
                     try {
-                        Log.i("ProfileSharingExample", auth.toJSONObject().toString(4));
+                        Log.i(TAG, auth.toJSONObject().toString(4));
 
                         String authorization_code = auth.getAuthorizationCode();
-                        Log.i("ProfileSharingExample", authorization_code);
+                        Log.i(TAG, authorization_code);
 
                         sendAuthorizationToServer(auth);
                         Toast.makeText(
@@ -458,21 +449,20 @@ public class ItemTabFragment extends Fragment {
                                 .show();
 
                     } catch (JSONException e) {
-                        Log.e("ProfileSharingExample", "an extremely unlikely failure occurred: ", e);
+                        Log.e(TAG, "A failure occurred: ", e);
                     }
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.i("ProfileSharingExample", "The user canceled.");
+                Log.i(TAG, "The user canceled.");
             } else if (resultCode == PayPalFuturePaymentActivity.RESULT_EXTRAS_INVALID) {
-                Log.i(
-                        "ProfileSharingExample",
-                        "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration. Please see the docs.");
+                Log.i(TAG, "Probably the attempt to previously start the PayPalService had an invalid PayPalConfiguration.");
             }
         }
     }
 
     private void sendAuthorizationToServer(PayPalAuthorization authorization) {
-        ;
+        ; // nothing to sent yet since we are using PayPalConfiguration.ENVIRONMENT_NO_NETWORK; for the purpose of testing
     }
+
 
 }

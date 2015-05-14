@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by cynthia on 4/27/15.
@@ -21,6 +22,8 @@ public class VoteItemFragment extends DialogFragment {
     private int mEventIdx;
     private int mItemIdx;
     private Item mItem;
+    private Event mEvent;
+    private int mOption;
 
     static VoteItemFragment newInstance( int eventIdx, int itemIdx){
         Bundle args = new Bundle();
@@ -41,7 +44,8 @@ public class VoteItemFragment extends DialogFragment {
 
         mEventIdx = getArguments().getInt(ItemInfoActivity.EVENT_INDEX);
         mItemIdx = getArguments().getInt(ItemInfoActivity.ITEM_INDEX);
-        mItem = Data.get().getEvent(mEventIdx).getItemAtIndex(mItemIdx);
+        mEvent= Data.get().getEvent(mEventIdx);
+        mItem = mEvent.getItemAtIndex(mItemIdx);
         ArrayList<ItemInfo> itemInfoList = mItem.getItemInfoList();
 
         for (int i = 0; i < itemInfoList.size(); i++) {
@@ -51,9 +55,14 @@ public class VoteItemFragment extends DialogFragment {
 
         AlertDialog.Builder  builder = new AlertDialog.Builder(getActivity());
 
+        mOption = Data.get().getMe()
+                .getVote(Data.get().getEvent(mEventIdx).getEventID(),
+                        Data.get().getEvent(mEventIdx).getItemAtIndex(mItemIdx).getItemID());
+
+        mOption = (mOption > itemInfoList.size()) ? -1: mOption;
         builder.setView(v)
                 .setTitle(R.string.vote_for_option)
-                .setSingleChoiceItems(itemName,0, new DialogSelectionClickHandler())
+                .setSingleChoiceItems(itemName,(mOption == -1 )? 0: mOption, new DialogSelectionClickHandler())
                 .setPositiveButton("OK", new positionClickListener())
                 .setNeutralButton(android.R.string.cancel, null);
 
@@ -67,11 +76,63 @@ public class VoteItemFragment extends DialogFragment {
         }
     }
     public class positionClickListener implements DialogInterface.OnClickListener{
+        ItemInfo itemInfo;
+        UUID eventId;
+        UUID itemId;
+
         @Override
         public void onClick(DialogInterface dialog, int id) {
-            ItemInfo itemInfo = mItem.getItemInfoList().get(mSelectedItem);
-            itemInfo.setNumOfVote(itemInfo.getNumOfVote() + 1);
-            mItem.addVote();
+            itemInfo = mItem.getItemInfoList().get(mSelectedItem);
+            eventId = mEvent.getEventID();
+            itemId = mItem.getItemID();
+            if (mOption == -1) {
+                itemInfo.setNumOfVote(itemInfo.getNumOfVote() + 1);
+                mItem.addVote();
+                Data.get().getMe().addVote(eventId, itemId, mSelectedItem);
+            }
+            else {
+                int vote = Data.get().getMe().getVote(eventId, itemId);
+                if (vote != mSelectedItem ) {
+                    Log.d(TAG, " My VOTE WAS " + vote);
+                    if (vote != -1) {
+                        itemInfo = mItem.getItemInfoList().get(vote);
+                        itemInfo.setNumOfVote(itemInfo.getNumOfVote() - 1);
+                    }
+                    itemInfo = mItem.getItemInfoList().get(mSelectedItem);
+                    itemInfo.setNumOfVote(itemInfo.getNumOfVote() + 1);
+
+                }
+                Data.get().getMe().addVote(eventId, itemId, mSelectedItem);
+
+            }
+            checkAllVote();
+            mItem.getItemInfoListAdaptor().notifyDataSetChanged();
+        }
+
+        private void checkAllVote(){
+            int totalVote = mItem.getTotalNumOfVote();
+            int numberOfMember = mEvent.getMemberList().size();
+            ItemInfo highestVote = null;
+            Log.d(TAG, " Total Vote " + totalVote + "Number of Member "+ numberOfMember);
+
+            if (totalVote == numberOfMember){
+                for (ItemInfo info: mItem.getItemInfoList()){
+                    if (highestVote == null){
+                        highestVote = info;
+                    }
+                    else if (highestVote.getNumOfVote() < info.getNumOfVote()){
+                        highestVote = info;
+                    }
+                }
+
+                mItem.setItemFinalInfo(highestVote);
+                mItem.setItemStatus(Item.itemStatusEnum.waitToBeBuy);
+                mEvent.getItemListAdaptor().notifyDataSetChanged();
+
+                getActivity().onBackPressed();
+            }
         }
     }
+
+
 }

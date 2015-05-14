@@ -20,7 +20,7 @@ public class ItemInfo {
         mItemPrice = 0.0;
         mRecipe = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_receipt);
         mStore = "";
-        mNumOfVote = 3;
+        mNumOfVote = 1;
         mMemberName = "Gigi";
         mDescription = "";
     }
