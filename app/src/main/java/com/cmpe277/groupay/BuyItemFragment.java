@@ -3,6 +3,7 @@ package com.cmpe277.groupay;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,12 +21,18 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class BuyItemFragment extends DialogFragment {
     private static final String TAG = "BuyItemFragment";
+    static final int REQUEST_TAKE_PHOTO = 1;
+    String mCurrentPhotoPath;
     private Item mItem;
     private int mEventIdx;
     private int mItemIdx;
+
 
     static BuyItemFragment newInstance(int eventIndex, int itemIndex) {
         Bundle args = new Bundle();
@@ -103,13 +110,62 @@ public class BuyItemFragment extends DialogFragment {
                             }
                         });
 
+
+        ////////////////////////////////// Take Picture for Reciept button //////////////////////////////////////////////
         receiptImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Ensure that there's a camera activity to handle the intent
+                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    // Create the File where the photo should go
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+                        // Error occurred while creating the File
+                        // handle error.......................................
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                Uri.fromFile(photoFile));
+                        startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                    };
+                }
             }
+
+
         });
 
         return dialogBuilder.create();
     }
+
+
+
+
+    ///////////////////////////////////// Creates a file to store the image   /////////////////////////////////////////////
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
 }
+
+
+
+
+
