@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
@@ -16,6 +18,8 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -46,15 +50,21 @@ public class ServerTask extends AsyncTask <String, Void, String>
         try {
             // External IP = 50.152.186.29
             // Internal IP = 10.0.0.139
-            url = new URL("http://50.152.186.29");
+            url = new URL("http://50.152.186.29/android/login.php");
 
             //Open a connection to that URL.
             connect = (HttpURLConnection) url.openConnection();
             connect.setConnectTimeout(5000);
 
             // State we are uploading to server
-            connect.setDoOutput(true);
+            connect.setDoOutput(true);  // Allows outputs/ POST
+            connect.setDoInput(true);   // Allows inputs
+            connect.setRequestMethod("POST");
 
+            // Increase performance/ prevent exhaust res, stops Android from buffering the complete request body in memory before it is transmitted
+                connect.setChunkedStreamingMode(0);  // Used when string length unknown
+                // setFixedLengthStreamingMode(int) // Can use this when string length known
+            
             //Send POST  request to server
             PrintWriter output = new PrintWriter(connect.getOutputStream());
             output.print(request);
@@ -68,6 +78,9 @@ public class ServerTask extends AsyncTask <String, Void, String>
 
             // release the connection so its resources can be reused/closed
               connect.disconnect();
+
+            // Close instream
+            inStream.close();
 
     /* Define InputStreams to read from the URLConnection. */
             //InputStream aInputStream = connect.getInputStream();
