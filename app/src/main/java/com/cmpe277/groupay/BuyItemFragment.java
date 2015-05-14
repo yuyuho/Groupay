@@ -13,12 +13,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,8 @@ public class BuyItemFragment extends DialogFragment {
     private Item mItem;
     private int mEventIdx;
     private int mItemIdx;
+    private File mPhotoFile;
+    private ImageButton mReceiptImageButton;
 
 
     static BuyItemFragment newInstance(int eventIndex, int itemIndex) {
@@ -65,6 +69,7 @@ public class BuyItemFragment extends DialogFragment {
         final EditText storeEditText = (EditText) newItemView.findViewById(R.id.store_edit_text);
         final EditText descEditText = (EditText) newItemView.findViewById(R.id.describe_edit_text);
         final ImageButton receiptImageButton = (ImageButton) newItemView.findViewById(R.id.item_receipt_image);
+        mReceiptImageButton = receiptImageButton;
 
         final ItemInfo itemInfo = mItem.getItemFinalInfo();
         final Bitmap recipeImage;
@@ -120,19 +125,22 @@ public class BuyItemFragment extends DialogFragment {
                 // Ensure that there's a camera activity to handle the intent
                 if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                     // Create the File where the photo should go
-                    File photoFile = null;
+                    mPhotoFile = null;
                     try {
-                        photoFile = createImageFile();
+                        mPhotoFile = createImageFile();
                     } catch (IOException ex) {
-                        // Error occurred while creating the File
-                        // handle error.......................................
+                        Toast.makeText(
+                                BuyItemFragment.this.getActivity(),
+                                "Could not create Image File.", Toast.LENGTH_LONG)
+                                .show();
+                        Log.e(TAG, "Error occurred while creating the image file");
                     }
                     // Continue only if the File was successfully created
-                    if (photoFile != null) {
+                    if (mPhotoFile != null) {
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                Uri.fromFile(photoFile));
+                                Uri.fromFile(mPhotoFile));
                         startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                    };
+                    }
                 }
             }
 
@@ -141,9 +149,6 @@ public class BuyItemFragment extends DialogFragment {
 
         return dialogBuilder.create();
     }
-
-
-
 
     ///////////////////////////////////// Creates a file to store the image   /////////////////////////////////////////////
     private File createImageFile() throws IOException {
@@ -161,6 +166,20 @@ public class BuyItemFragment extends DialogFragment {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        int eventIdx = getArguments().getInt(ItemInfoActivity.EVENT_INDEX);
+        int itemIdx = getArguments().getInt(ItemInfoActivity.ITEM_INDEX);
+        int mDisplayOption = getArguments().getInt(ItemInfoActivity.DISPLAY_OPTION);
+        mItem = Data.get().getEvent(eventIdx).getItemAtIndex(itemIdx);
+        ItemInfo itemInfo = mItem.getItemFinalInfo();
+
+        Bitmap mBitmap = BitmapFactory.decodeFile(mPhotoFile.getAbsolutePath());
+        itemInfo.setRecipe(mBitmap);
+        mReceiptImageButton.setImageBitmap(mBitmap.createScaledBitmap(mBitmap, 500, 500,false));
+
     }
 
 }
