@@ -60,7 +60,7 @@ public class SignInActivity extends ActionBarActivity {
                         Log.e(TAG, "Connection Fail");
                     }
                 });
-                serverTask.execute(serverMsg);
+                serverTask.execute("login", mUserName.getText().toString(), mPassword.getText().toString());
 
             }
         });
