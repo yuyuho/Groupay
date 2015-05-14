@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -19,10 +20,14 @@ import java.util.Scanner;
  */
 public class ServerTask extends AsyncTask <String, Void, String>
 {
+    private static final String TAG = "ServerTask";
     // Declare AsyncResponse interface
     public AsyncResponse delegate = null;
     public static ServerTask task;
 
+    public ServerTask(AsyncResponse asyncResponse){
+        delegate = asyncResponse;
+    }
     @Override
     public String doInBackground(String... request)
     {
@@ -35,10 +40,11 @@ public class ServerTask extends AsyncTask <String, Void, String>
         try {
             // External IP = 50.152.186.29
             // Internal IP = 10.0.0.139
-            url = new URL("http://10.0.0.139");
+            url = new URL("http://50.152.186.29");
 
             //Open a connection to that URL.
             connect = (HttpURLConnection) url.openConnection();
+            connect.setConnectTimeout(5000);
 
             // State we are uploading to server
             connect.setDoOutput(true);
@@ -71,19 +77,22 @@ public class ServerTask extends AsyncTask <String, Void, String>
     /* Convert the Bytes read to a String. */
   //          received = new String(aByteArrayBuffer.toByteArray());
         }
-
-        catch (IOException e) {
-            //Log.d(TAG, e.toString());
-            //Toast.makeText(ServerTask.this, e.toString(),1).show();
+        catch (SocketException e){
+            Log.e(TAG, e.toString());
+            delegate.connectionFail();
         }
-return received;
+        catch (IOException e) {
+            Log.e(TAG, e.toString());
+            delegate.connectionFail();
+        }
+        return received;
     }
 
 
     @Override
     protected void onPostExecute(String result) {
         // send result to interface fn. // causes crash //
-            //delegate.taskFinish(result);
+        delegate.taskFinish(result);
 
     }
 

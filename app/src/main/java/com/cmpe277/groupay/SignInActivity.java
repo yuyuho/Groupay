@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +16,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class SignInActivity extends ActionBarActivity {
-
+    private static final String TAG = "SignInActivity";
     private Toolbar mToolbar;
     private Button mSignInButton;
     private Button mCancelButton;
@@ -45,31 +47,21 @@ public class SignInActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Check User identity here
-                Boolean isUser = true;
-                // If pass
-                if (isUser) {
-                    Data.get().getMe().setMyName(mUserName.getText().toString());
-                    Intent i = new Intent(SignInActivity.this, EventListActivity.class);
-                    startActivity(i);
-                }
-                else {
-                    LayoutInflater layoutInflater = LayoutInflater.from(SignInActivity.this);
-                    View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
-                    TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
-                    textView.setText(getResources().getText(R.string.identity_is_not_being_recognized));
+                String serverMsg = mUserName.getText().toString() + " " +mPassword.getText().toString();
+                ServerTask serverTask = new ServerTask(new AsyncResponse() {
+                    @Override
+                    public void taskFinish(String output) {
+                        Log.d(TAG, "Response from task: " + output);
+                        signInSuccessful(true);
+                    }
 
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SignInActivity.this);
+                    @Override
+                    public void connectionFail() {
+                        Log.e(TAG, "Connection Fail");
+                    }
+                });
+                serverTask.execute(serverMsg);
 
-                    dialogBuilder.setView(newItemView);
-                    dialogBuilder.setPositiveButton("Yes",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
-                    dialogBuilder.create().show();
-                }
             }
         });
         mCancelButton.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +73,32 @@ public class SignInActivity extends ActionBarActivity {
         });
     }
 
+
+    private void signInSuccessful(boolean isUser){
+        if (isUser) {
+            Data.get().getMe().setMyName(mUserName.getText().toString());
+            Intent i = new Intent(SignInActivity.this, EventListActivity.class);
+            startActivity(i);
+        }
+        else {
+            LayoutInflater layoutInflater = LayoutInflater.from(SignInActivity.this);
+            View newItemView = layoutInflater.inflate(R.layout.dialog_yes_no, null);
+            TextView textView = (TextView) newItemView.findViewById(R.id.dialog_yesno_text_view);
+            textView.setText(getResources().getText(R.string.identity_is_not_being_recognized));
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SignInActivity.this);
+
+            dialogBuilder.setView(newItemView);
+            dialogBuilder.setPositiveButton("Yes",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+            dialogBuilder.create().show();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
