@@ -63,17 +63,9 @@ public class EventListActivity extends ActionBarActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         FragmentManager fm = getSupportFragmentManager();
         switch(item.getItemId()) {
-            case R.id.action_settings:
-                return true;
-
             case R.id.create_event_item:
                 CreateEventFragment fragment = new CreateEventFragment();
                 fragment.show(fm, CREATE_EVENT_DIALOG_TAG);
-                return true;
-
-            case R.id.delete_event_item:
-                DeleteEventFragment deleteEventFragment = new DeleteEventFragment();
-                deleteEventFragment.show(fm, DELETE_EVENT_DIALOG_TAG);
                 return true;
 
 
