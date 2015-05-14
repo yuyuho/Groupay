@@ -7,7 +7,6 @@
     <string name="title_activity_item_info">ItemInfoActivity</string>
     <string name="title_activity_item_vote">ItemVoteActivity</string>
 
-    <string name="action_settings">Settings</string>
     <string name="action_create_event">Create Event</string>
     <string name="action_delete_event">Delete Event</string>
     <string name="action_propose_item">Propose Item</string>
@@ -33,6 +32,7 @@
     <string name="select_delete_event">Select Delete Event</string>
 
     <string name="enter_item_name">Enter New Item</string>
+    <string name="identity_is_not_being_recognized">Username/Password is not recognized</string>
     <string name="would_you_take_ownership">Would you like to take the ownership?</string>
     <string name="have_you_bought">Have you bought it yet?</string>
     <string name="item_info">Item Information</string>
