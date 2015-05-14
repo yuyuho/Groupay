@@ -52,12 +52,10 @@ public class SignInActivity extends ActionBarActivity {
                     @Override
                     public void taskFinish(String output) {
                         Log.d(TAG, "Response from task: " + output);
-                        signInSuccessful(true);
-                    }
-
-                    @Override
-                    public void connectionFail() {
-                        Log.e(TAG, "Connection Fail");
+                        if(output.compareTo("login success") == 0)
+                            signInSuccessful(true);
+                        else
+                            signInSuccessful(false);
                     }
                 });
                 serverTask.execute("login", mUserName.getText().toString(), mPassword.getText().toString());
@@ -89,7 +87,7 @@ public class SignInActivity extends ActionBarActivity {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SignInActivity.this);
 
             dialogBuilder.setView(newItemView);
-            dialogBuilder.setPositiveButton("Yes",
+            dialogBuilder.setPositiveButton("Ok",
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
