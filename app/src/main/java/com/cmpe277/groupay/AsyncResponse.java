@@ -5,5 +5,4 @@ package com.cmpe277.groupay;
  */
 public interface AsyncResponse {
     public void taskFinish(String output);
-    public void connectionFail();
 }
