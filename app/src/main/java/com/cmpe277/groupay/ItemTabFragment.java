@@ -40,6 +40,7 @@ import org.json.JSONException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -63,7 +64,7 @@ public class ItemTabFragment extends Fragment {
     private static PayPalConfiguration config = new PayPalConfiguration()
             .environment(CONFIG_ENVIRONMENT)
             .clientId(CONFIG_CLIENT_ID)
-            .acceptCreditCards(true);
+            .acceptCreditCards(false);
 
     public static ItemTabFragment newInstance (int eventNum){
         Bundle args = new Bundle();
@@ -373,6 +374,11 @@ public class ItemTabFragment extends Fragment {
     private PayPalPayment getThingToBuy(String paymentIntent) {
         float amount = ((float)mEvent.getEventExpense()/ ((float) mEvent.getMemberList().size())) -
                 (float)Data.get().getMe().getExpense(mEvent.getEventID());
+        if (amount == 0) {
+            Random randomGenerator = new Random();
+            amount = randomGenerator.nextFloat() * 100;
+            mEvent.addEventExpense(amount);
+        }
         Log.e(TAG, "amount to pay: " + String.valueOf(amount) );
         return new PayPalPayment(new BigDecimal(String.valueOf(amount + 5)), "USD","sample item",paymentIntent);
     }
