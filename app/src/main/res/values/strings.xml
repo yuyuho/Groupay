@@ -26,8 +26,7 @@
     <string name="event_image">Event Image</string>
     <string name="event_name">Event Name</string>
     <string name="event_date">Event Date</string>
-
-    <string name="this_is_an_open_event">This is an open event</string>
+    <string name="connection_fail">Connection failure</string>
 
     <string name="select_delete_event">Select Delete Event</string>
 

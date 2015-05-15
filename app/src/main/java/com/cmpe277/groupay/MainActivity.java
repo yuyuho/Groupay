@@ -101,6 +101,7 @@ public class MainActivity extends Activity {
         Data.get().getmEventList().get(0).addMember("Abraham");
         Data.get().getmEventList().get(1).addMember("Elliot");
         UUID eventID1 = Data.get().getEvent(0).getEventID();
+
         Data.get().getMe().addNewEvent(eventID1);
         UUID eventID2 = Data.get().getEvent(1).getEventID();
         Data.get().getMe().addNewEvent(eventID2);

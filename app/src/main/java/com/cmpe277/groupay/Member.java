@@ -8,6 +8,7 @@ import java.util.UUID;
  */
 public class Member {
     private String mMyName;
+    private int mMemberId;
     private ArrayList<myEvent> myEventList;
 
     public Member(){
@@ -16,6 +17,7 @@ public class Member {
     }
     public Member(String myName){
         mMyName = myName;
+        mMemberId = 0;
         myEventList = new ArrayList<myEvent>();
     }
 
@@ -24,6 +26,14 @@ public class Member {
     }
     public void setMyName(String myName){
         mMyName = myName;
+    }
+
+    public int getMemberId() {
+        return mMemberId;
+    }
+
+    public void setMemberId(int memberId) {
+        this.mMemberId = memberId;
     }
 
     public void addNewEvent(UUID eventID){

@@ -1,5 +1,6 @@
 package com.cmpe277.groupay;
 
+import android.content.Context;
 import android.content.Entity;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -35,21 +36,25 @@ import java.util.Scanner;
 public class ServerTask extends AsyncTask <String, Void, String>
 {
     private static final String TAG = "ServerTask";
+    private static final String CONNECTION_FAIL = "Connection Failed";
     // Declare AsyncResponse interface
     public AsyncResponse delegate = null;
     public static ServerTask task;
+    private Context mContext;
 
-    public ServerTask(AsyncResponse asyncResponse){
+    public ServerTask(Context context, AsyncResponse asyncResponse){
         delegate = asyncResponse;
+        mContext = context;
     }
     @Override
     public String doInBackground(String... request) {
         if (request[0].toString().compareTo("login") == 0) {
             String result = login(request[1], request[2]);
-            if (result.compareTo("Password is incorrect") == 0 || result.compareTo("Could not complete query. Missing parameter") == 0) {
+            if (result.compareTo("Password is incorrect") == 0 ||
+                result.compareTo("Could not complete query. Missing parameter") == 0) {
                 return "login failed";
             }else {
-                return "login success";
+                return result;
             }
         }else if(request[0].toString().compareTo("addevent") == 0){
             return "event added";
@@ -58,6 +63,7 @@ public class ServerTask extends AsyncTask <String, Void, String>
             return "request not handled";
         }
     }
+
 
     public String login(String user, String pass){
         HttpClient httpClient = new DefaultHttpClient();
@@ -73,22 +79,26 @@ public class ServerTask extends AsyncTask <String, Void, String>
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity);
 
+
             Log.d("%s", result);
 
             return result;
         } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
+            return CONNECTION_FAIL;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            return CONNECTION_FAIL;
         }
-        return "Exception";
     }
 
     @Override
     protected void onPostExecute(String result) {
         // send result to interface fn. // causes crash //
-        delegate.taskFinish(result);
-
+        if (result == CONNECTION_FAIL){
+            Toast.makeText(mContext, R.string.connection_fail, Toast.LENGTH_LONG);
+        }
+        else {
+            delegate.taskFinish(result);
+        }
     }
 
 }

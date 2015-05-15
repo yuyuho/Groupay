@@ -18,6 +18,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class SignInActivity extends ActionBarActivity {
     private static final String TAG = "SignInActivity";
@@ -47,15 +50,35 @@ public class SignInActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Check User identity here
-                String serverMsg = mUserName.getText().toString() + " " +mPassword.getText().toString();
-                ServerTask serverTask = new ServerTask(new AsyncResponse() {
+                ServerTask serverTask =
+                        new ServerTask(SignInActivity.this, new AsyncResponse() {
                     @Override
                     public void taskFinish(String output) {
                         Log.d(TAG, "Response from task: " + output);
-                        if(output.compareTo("login success") == 0)
-                            signInSuccessful(true);
-                        else
+                        try {
+                            JSONObject jsonObject = new JSONObject(output);
+                            String userIdStr = jsonObject.getString("userid");
+                            String user = jsonObject.getString("username");
+                            Log.d(TAG, "User :" + user + " UserID:"+ userIdStr);
+                            if (! userIdStr.isEmpty()) {
+                                int userid = Integer.parseInt(userIdStr);
+                                Data.get().getMe().setMemberId(userid);
+                                Data.get().getMe().setMyName(user);
+                                if (user.equalsIgnoreCase(mUserName.getText().toString())){
+                                    signInSuccessful(true);
+                                }
+                                else{
+                                    signInSuccessful(false);
+                                }
+                            }
+                            else{
+                                signInSuccessful(false);
+                            }
+                        }
+                        catch (JSONException e ){
+                            Log.e(TAG, "Return Response cannot be phased "+ output );
                             signInSuccessful(false);
+                        }
                     }
                 });
                 serverTask.execute("login", mUserName.getText().toString(), mPassword.getText().toString());

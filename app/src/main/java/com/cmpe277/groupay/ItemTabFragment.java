@@ -371,7 +371,8 @@ public class ItemTabFragment extends Fragment {
 
     // paypal private functions
     private PayPalPayment getThingToBuy(String paymentIntent) {
-        float amount = Data.get().getMe().getExpense(Data.get().getEvent(mEventIdx).getEventID());
+        float amount = ((float)mEvent.getEventExpense()/ ((float) mEvent.getMemberList().size())) -
+                (float)Data.get().getMe().getExpense(mEvent.getEventID());
         Log.e(TAG, "amount to pay: " + String.valueOf(amount) );
         return new PayPalPayment(new BigDecimal(String.valueOf(amount + 5)), "USD","sample item",paymentIntent);
     }
