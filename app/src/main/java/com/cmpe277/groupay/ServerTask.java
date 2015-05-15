@@ -37,6 +37,9 @@ public class ServerTask extends AsyncTask <String, Void, String>
 {
     private static final String TAG = "ServerTask";
     private static final String CONNECTION_FAIL = "Connection Failed";
+
+    //Action
+    public static final String CREATE_EVENT = "Create Event";
     // Declare AsyncResponse interface
     public AsyncResponse delegate = null;
     public static ServerTask task;
@@ -56,7 +59,13 @@ public class ServerTask extends AsyncTask <String, Void, String>
             }else {
                 return result;
             }
-        }else if(request[0].toString().compareTo("addevent") == 0){
+        }
+        else if (request[0].toString().compareTo(CREATE_EVENT) == 0){
+            String date = request[3] +"/" + request[4] + "/" + request[5];
+            String result = createEvent(request[1], request[2], date);
+            return result;
+        }
+        else if(request[0].toString().compareTo("addevent") == 0){
             return "event added";
         }else {
             //request not handled
@@ -79,7 +88,6 @@ public class ServerTask extends AsyncTask <String, Void, String>
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity);
 
-
             Log.d("%s", result);
 
             return result;
@@ -90,6 +98,34 @@ public class ServerTask extends AsyncTask <String, Void, String>
         }
     }
 
+    private String createEvent(String user, String eventName, String date){
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPost httpPost = new HttpPost("http://50.152.186.29/android/addEvent.php");
+
+        try {
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+            nameValuePairs.add(new BasicNameValuePair("eventname", eventName));
+            nameValuePairs.add(new BasicNameValuePair("userid", user));
+            nameValuePairs.add(new BasicNameValuePair("manager", user));
+            nameValuePairs.add(new BasicNameValuePair("date", date));
+            nameValuePairs.add(new BasicNameValuePair("status", "ongoing"));
+            nameValuePairs.add(new BasicNameValuePair("open", "open"));
+            nameValuePairs.add(new BasicNameValuePair("totalspent", "0"));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            String result = EntityUtils.toString(entity);
+
+            Log.d("%s", result);
+
+            return result;
+        } catch (ClientProtocolException e) {
+            return CONNECTION_FAIL;
+        } catch (IOException e) {
+            return CONNECTION_FAIL;
+        }
+    }
     @Override
     protected void onPostExecute(String result) {
         // send result to interface fn. // causes crash //

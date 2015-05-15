@@ -24,6 +24,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.util.Calendar;
 
@@ -117,6 +120,21 @@ public class CreateEventFragment extends DialogFragment {
 
                                 Data.get().getMe().addNewEvent(event.getEventID());
                                 Data.get().addEvent(event);
+
+                                ServerTask serverTask =
+                                        new ServerTask(getActivity(), new AsyncResponse() {
+                                            @Override
+                                            public void taskFinish(String output) {
+                                                Log.d(TAG, "Response from task: " + output);
+                                                if (output.equalsIgnoreCase("Success")){
+                                                    Log.d(TAG, "Create event");
+                                                }
+                                            }
+                                        });
+                                serverTask.execute(serverTask.CREATE_EVENT,
+                                        String.valueOf(Data.get().getMyID()),
+                                        mEventName.getText().toString(),
+                                        String.valueOf(mMonth), String.valueOf(mDay), String.valueOf(mYear));
                             }
                         })
                 .setNegativeButton("Cancel",

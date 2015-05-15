@@ -38,6 +38,9 @@ public class Data {
     public String getMyName() {
         return mMe.getMyName();
     }
+    public int getMyID() {
+        return mMe.getMemberId();
+    }
     public void setMyName(String myName) {
 
         if(mMe == null){
