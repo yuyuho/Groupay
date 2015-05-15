@@ -15,8 +15,12 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MyEventListFragment extends Fragment {
     private static final String TAG = "MyEventListFragment";
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,6 +31,53 @@ public class MyEventListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_event_list, container, false);
         ListView eventListView = (ListView) v.findViewById(R.id.event_list);
+
+        ServerTask serverTask =
+                new ServerTask(getActivity(), new AsyncResponse() {
+                    @Override
+                    public void taskFinish(String output) {
+                        Log.d(TAG, "Response from task: " + output);
+                        try{
+                            int second_pos = 0;
+                            int first_pos = 0;
+                            String eventId;
+                            String date;
+                            String status;
+                            String open;
+                            String manager;
+                            String totalSpent;
+                            String eventName;
+
+                            while(second_pos < output.length()-1){
+                                second_pos = output.indexOf('}', second_pos) + 1;
+
+                                String temp = output.substring(first_pos, second_pos);
+                                first_pos = second_pos;
+
+                                Log.d(TAG, "Temp "+ temp);
+                                JSONObject jsonObject = new JSONObject(temp);
+                                eventId = jsonObject.getString("eventid");
+                                date = jsonObject.getString("date");
+                                status = jsonObject.getString("status");
+                                open = jsonObject.getString("open");
+                                manager = jsonObject.getString("manager");
+                                totalSpent = jsonObject.getString("totalspent");
+                                eventName = jsonObject.getString("name");
+
+                                Log.d(TAG, "eventid "+ eventId + "date "+ date +
+                                        "open " + open + "status" + status + "manager " + manager + "totalspent "+ totalSpent + "name " + eventName);
+
+                            }
+
+
+                        }
+                        catch (JSONException e ){
+                            Log.e(TAG, "Return Response cannot be phased "+ output );
+                        }
+                    }
+                });
+        serverTask.execute(serverTask.GET_MY_EVENT, String.valueOf(Data.get().getMyID()));
+
 
         EventListAdapter eventArrayAdapter=
                 new EventListAdapter( getActivity(),

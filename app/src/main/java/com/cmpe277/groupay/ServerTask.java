@@ -40,6 +40,7 @@ public class ServerTask extends AsyncTask <String, Void, String>
 
     //Action
     public static final String CREATE_EVENT = "Create Event";
+    public static final String GET_MY_EVENT = "Get My Event";
     // Declare AsyncResponse interface
     public AsyncResponse delegate = null;
     public static ServerTask task;
@@ -64,6 +65,9 @@ public class ServerTask extends AsyncTask <String, Void, String>
             String date = request[3] +"/" + request[4] + "/" + request[5];
             String result = createEvent(request[1], request[2], date);
             return result;
+        }
+        else if (request[0].toString().compareTo(GET_MY_EVENT) ==0 ){
+            return getMyEvent(request[1]);
         }
         else if(request[0].toString().compareTo("addevent") == 0){
             return "event added";
@@ -111,6 +115,28 @@ public class ServerTask extends AsyncTask <String, Void, String>
             nameValuePairs.add(new BasicNameValuePair("status", "ongoing"));
             nameValuePairs.add(new BasicNameValuePair("open", "open"));
             nameValuePairs.add(new BasicNameValuePair("totalspent", "0"));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            String result = EntityUtils.toString(entity);
+
+            Log.d("%s", result);
+
+            return result;
+        } catch (ClientProtocolException e) {
+            return CONNECTION_FAIL;
+        } catch (IOException e) {
+            return CONNECTION_FAIL;
+        }
+    }
+    private String getMyEvent(String user){
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPost httpPost = new HttpPost("http://50.152.186.29/android/getUserEvent.php");
+
+        try {
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+            nameValuePairs.add(new BasicNameValuePair("userid", user));
 
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse response = httpClient.execute(httpPost);

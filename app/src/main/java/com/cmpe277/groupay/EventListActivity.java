@@ -73,6 +73,20 @@ public class EventListActivity extends ActionBarActivity
 
     @Override
     public void onTabChanged(String tabId) {
+
+        if (mTabHost.getCurrentTab() == 0) {
+            MyEventListFragment myEventListFragment =
+                    new MyEventListFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.tabcontent, myEventListFragment)
+                    .commit();
+        } else if (mTabHost.getCurrentTab() == 1) {
+            OpenEventListFragment openEventListFragment
+                    = new OpenEventListFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.tabcontent, openEventListFragment)
+                    .commit();
+        }
     }
 
 }
